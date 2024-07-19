@@ -173,7 +173,7 @@ func (p *ProtocolWriter) value(i interface{}, version Version) {
 			p.byte('m')
 			p.byte(byte(len(f)))
 			for i := range f {
-				p.byte(f[i])
+				p.byte(byte(f[i]))
 			}
 		case ChannelVolumes:
 			p.byte('v')

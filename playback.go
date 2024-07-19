@@ -221,7 +221,7 @@ var PlaybackMono PlaybackOption = func(p *PlaybackStream) {
 
 // PlaybackStereo sets a stream to two channels.
 var PlaybackStereo PlaybackOption = func(p *PlaybackStream) {
-	p.createRequest.ChannelMap = proto.ChannelMap{proto.ChannelLeft, proto.ChannelRight}
+	p.createRequest.ChannelMap = proto.ChannelMap{proto.ChannelFrontLeft, proto.ChannelFrontRight}
 	p.createRequest.Channels = 2
 }
 

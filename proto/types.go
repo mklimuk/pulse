@@ -1,6 +1,9 @@
 package proto
 
-import "math"
+import (
+	"fmt"
+	"math"
+)
 
 const Undefined = 0xFFFFFFFF
 
@@ -14,32 +17,65 @@ const (
 	FormatInt32BE   = 8
 )
 
+type Channel byte
+
+func (c Channel) String() string {
+	if s, ok := channels[c]; ok {
+		return s
+	}
+	return fmt.Sprintf("%d", c)
+}
+
 const (
-	ChannelMono           = 0
-	ChannelLeft           = 1
-	ChannelRight          = 2
-	ChannelCenter         = 3
-	ChannelFrontLeft      = 1
-	ChannelFrontRight     = 2
-	ChannelFrontCenter    = 3
-	ChannelRearCenter     = 4
-	ChannelRearLeft       = 5
-	ChannelRearRight      = 6
-	ChannelLFE            = 7
-	ChannelLeftCenter     = 8
-	ChannelRightCenter    = 9
-	ChannelLeftSide       = 10
-	ChannelRightSide      = 11
-	ChannelAux0           = 12
-	ChannelAux31          = 43
-	ChannelTopCenter      = 44
-	ChannelTopFrontLeft   = 45
-	ChannelTopFrontRight  = 46
-	ChannelTopFrontCenter = 47
-	ChannelTopRearLeft    = 48
-	ChannelTopRearRight   = 49
-	ChannelTopRearCenter  = 50
+	ChannelMono           Channel = 0
+	ChannelLeft           Channel = 1
+	ChannelRight          Channel = 2
+	ChannelCenter         Channel = 3
+	ChannelFrontLeft      Channel = 1
+	ChannelFrontRight     Channel = 2
+	ChannelFrontCenter    Channel = 3
+	ChannelRearCenter     Channel = 4
+	ChannelRearLeft       Channel = 5
+	ChannelRearRight      Channel = 6
+	ChannelLFE            Channel = 7
+	ChannelLeftCenter     Channel = 8
+	ChannelRightCenter    Channel = 9
+	ChannelLeftSide       Channel = 10
+	ChannelRightSide      Channel = 11
+	ChannelAux0           Channel = 12
+	ChannelAux31          Channel = 43
+	ChannelTopCenter      Channel = 44
+	ChannelTopFrontLeft   Channel = 45
+	ChannelTopFrontRight  Channel = 46
+	ChannelTopFrontCenter Channel = 47
+	ChannelTopRearLeft    Channel = 48
+	ChannelTopRearRight   Channel = 49
+	ChannelTopRearCenter  Channel = 50
 )
+
+var channels = map[Channel]string{
+	ChannelMono:           "mono",
+	ChannelFrontLeft:      "front-left",
+	ChannelFrontRight:     "front-right",
+	ChannelFrontCenter:    "front-center",
+	ChannelRearCenter:     "rear-center",
+	ChannelRearLeft:       "rear-left",
+	ChannelRearRight:      "rear-right",
+	ChannelLFE:            "LFE",
+	ChannelLeftCenter:     "left-center",
+	ChannelRightCenter:    "right-center",
+	ChannelLeftSide:       "left-side",
+	ChannelRightSide:      "right-side",
+	ChannelAux0:           "aux0",
+	ChannelAux31:          "aux31",
+	ChannelTopCenter:      "top-center",
+	ChannelTopFrontLeft:   "top-front-left",
+	ChannelTopFrontRight:  "top-front-right",
+	ChannelTopFrontCenter: "top-front-center",
+	ChannelTopRearLeft:    "top-rear-left",
+	ChannelTopRearRight:   "top-rear-right",
+	ChannelTopRearCenter:  "top-rear-center",
+}
 
 const (
 	EncodingPCM = 1
@@ -53,7 +89,7 @@ type SampleSpec struct {
 
 type Microseconds uint64
 
-type ChannelMap []byte
+type ChannelMap []Channel
 
 type ChannelVolumes []uint32
 
