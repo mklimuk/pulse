@@ -108,6 +108,16 @@ func NewClient(opts ...ClientOption) (*Client, error) {
 	return c, nil
 }
 
+// GetServerInfo return information about pulseaudio server
+func (c *Client) GetServerInfo() (proto.GetServerInfoReply, error) {
+	var reply proto.GetServerInfoReply
+	err := c.c.Request(&proto.GetServerInfo{}, &reply)
+	if err != nil {
+		return proto.GetServerInfoReply{}, err
+	}
+	return reply, nil
+}
+
 // Close closes the client. Calling methods on a closed client may panic.
 func (c *Client) Close() {
 	c.conn.Close()

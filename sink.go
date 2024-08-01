@@ -67,10 +67,6 @@ func (s *Sink) SinkIndex() uint32 {
 	return s.info.SinkIndex
 }
 
-func (s *Sink) ChannelMap() []proto.Channel {
-	return s.info.ChannelMap
-}
-
 // Volume returns channel volumes and the number of volume steps.
 func (s *Sink) Volume() ([]uint32, uint32) {
 	return s.info.ChannelVolumes, s.info.NumVolumeSteps - 1
