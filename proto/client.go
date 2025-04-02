@@ -103,8 +103,8 @@ func (c *Client) Request(req RequestArgs, rpl Reply) error {
 
 func (c *Client) Send(index uint32, data []byte) error {
 	c.writeM.Lock()
+	defer c.writeM.Unlock()
 	if c.err != nil {
-		c.writeM.Unlock()
 		return c.err
 	}
 	c.w.uint32(uint32(len(data)))
@@ -112,8 +112,10 @@ func (c *Client) Send(index uint32, data []byte) error {
 	c.w.uint64(0)
 	c.w.uint32(0)
 	c.w.flush()
-	c.w.w.Write(data)
-	c.writeM.Unlock()
+	_, err := c.w.w.Write(data)
+	if err != nil {
+		return fmt.Errorf("pulse: could not write data: %w", err)
+	}
 	return nil
 }
 

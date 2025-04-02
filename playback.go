@@ -1,6 +1,9 @@
 package pulse
 
-import "github.com/jfreymuth/pulse/proto"
+import (
+	"github.com/jfreymuth/pulse/proto"
+	"log/slog"
+)
 
 // A PlaybackStream is used for playing audio.
 // When creating a stream, the user must provide a callback that will be used to buffer audio data.
@@ -87,7 +90,10 @@ func (p *PlaybackStream) run() {
 		for p.requested > 0 {
 			n, err := p.r.Read(p.front[:p.requested])
 			if n > 0 {
-				p.c.c.Send(p.index, p.front[:n])
+				err := p.c.c.Send(p.index, p.front[:n])
+				if err != nil {
+					slog.Error("pulse: error sending playback data", "err", err)
+				}
 				p.requested -= n
 				p.front, p.back = p.back, p.front
 			}
@@ -110,12 +116,18 @@ func (p *PlaybackStream) run() {
 // Start starts playing audio.
 func (p *PlaybackStream) Start() {
 	if p.state == idle {
-		p.c.c.Request(&proto.FlushPlaybackStream{StreamIndex: p.index}, nil)
+		err := p.c.c.Request(&proto.FlushPlaybackStream{StreamIndex: p.index}, nil)
+		if err != nil {
+			slog.Error("pulse: error flushing playback stream", "err", err)
+		}
 		p.state = running
 		p.err = nil
 		p.request <- int(p.createReply.BufferTargetLength)
 		p.underflow = false
-		p.c.c.Request(&proto.CorkPlaybackStream{StreamIndex: p.index, Corked: false}, nil)
+		err = p.c.c.Request(&proto.CorkPlaybackStream{StreamIndex: p.index, Corked: false}, nil)
+		if err != nil {
+			slog.Error("pulse: error uncorking playback stream", "err", err)
+		}
 		<-p.started
 	}
 }
@@ -131,7 +143,10 @@ func (p *PlaybackStream) Stop() {
 // Pause stops playing audio immediately.
 func (p *PlaybackStream) Pause() {
 	if p.state == running {
-		p.c.c.Request(&proto.CorkPlaybackStream{StreamIndex: p.index, Corked: true}, nil)
+		err := p.c.c.Request(&proto.CorkPlaybackStream{StreamIndex: p.index, Corked: true}, nil)
+		if err != nil {
+			slog.Error("pulse: error corking playback stream", "err", err)
+		}
 		p.state = paused
 	}
 }
@@ -139,7 +154,10 @@ func (p *PlaybackStream) Pause() {
 // Resume resumes a paused stream.
 func (p *PlaybackStream) Resume() {
 	if p.state == paused {
-		p.c.c.Request(&proto.CorkPlaybackStream{StreamIndex: p.index, Corked: false}, nil)
+		err := p.c.c.Request(&proto.CorkPlaybackStream{StreamIndex: p.index, Corked: false}, nil)
+		if err != nil {
+			slog.Error("pulse: error uncorking playback stream", "err", err)
+		}
 		p.state = running
 		p.underflow = false
 	}
@@ -149,14 +167,20 @@ func (p *PlaybackStream) Resume() {
 // Drain does not return when the stream is paused.
 func (p *PlaybackStream) Drain() {
 	if p.state == running {
-		p.c.c.Request(&proto.DrainPlaybackStream{StreamIndex: p.index}, nil)
+		err := p.c.c.Request(&proto.DrainPlaybackStream{StreamIndex: p.index}, nil)
+		if err != nil {
+			slog.Error("pulse: error draining playback stream", "err", err)
+		}
 	}
 }
 
 // Close closes the stream.
 func (p *PlaybackStream) Close() {
 	if !p.Closed() {
-		p.c.c.Request(&proto.DeletePlaybackStream{StreamIndex: p.index}, nil)
+		err := p.c.c.Request(&proto.DeletePlaybackStream{StreamIndex: p.index}, nil)
+		if err != nil {
+			slog.Error("pulse: error closing playback stream", "err", err)
+		}
 		p.state = closed
 		close(p.request)
 		p.c.mu.Lock()
